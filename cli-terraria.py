@@ -1,5 +1,5 @@
 import shutil, colorama, random, sys, os, time
-
+colorama.Fore.LIGHTRED_EX
 class game:
     def getClearScreenCommand() -> str: #how to clear all stdout from the screen
         if (sys.platform.lower() not in ['win32', 'win64']): #assume anything but windows is linux/unix
@@ -7,10 +7,39 @@ class game:
         else:
             return 'cls' #windows clear command
     data = {} #the world data for the game
-    def generateTerrainData() -> dict: #generate a new world using the parameters
+    def generateTerrainData(startingHeight = 0, maxHeight = 20, minHeight = -20, worldWidth = 2000) -> dict: #generate a new world using the parameters
         dataDict = {
+            'meta':{
+                'version':'1',
+                'parameters':{
+                    'startingHeight':startingHeight,
+                    'maxHeight':maxHeight,
+                    'minHeight':minHeight,
+                    'worldWidth':worldWidth,
+                }
+            },
+            'blocks':{
 
+            },
+            'character':{
+                'position':[0, 0],
+            },
         }
+        groundLevel = startingHeight
+        for x_coordinate in range(worldWidth): #iterate through each column
+            dataDict['blocks'][x_coordinate] = {}
+            for y_coordinate in range(minHeight, (maxHeight + 1)):
+                block = 'LIGHTCYAN_EX' #uses colorama color codes
+                if (y_coordinate > groundLevel): #is above the ground level
+                    block = 'LIGHTCYAN_EX'
+                else:
+                    blocksBelowGroundLevel = groundLevel + y_coordinate
+                    if (blocksBelowGroundLevel == 0):
+                        block = 'GREEN' #is at the ground level
+                    else:
+                        block = 'LIGHTBLACK_EX' #stone level
+                dataDict['blocks'][x_coordinate][y_coordinate] = block
+            groundLevel += random.choice([-1, 0, 0, 0, 1])
         return dataDict
     running = True #makes sure the game is still running
     screen = 'loading' #controls what page the program displays
@@ -19,6 +48,7 @@ class game:
         'loadingStepCurrent':'not loading anything.', #the current thing that is loading - will be displayed on 'startscreen' screen
         'loadingProcesses':[['game.data = game.generateTerrainData()'], 0], #[[things to load], how many have been done so far + 1]
     }
+    blockType = '\u2588'
 
 while (game.running):
     os.system(game.getClearScreenCommand())
@@ -49,9 +79,23 @@ while (game.running):
             exec(game.otherdata['loadingProcesses'][0][game.otherdata['loadingProcesses'][1]])
             game.otherdata['loadingProcesses'][1] += 1
         else:
-            game.screen = 'startscreen'
+            game.screen = 'ingame'
         skipInput = True
         time.sleep(0.25) #make it seem like its doing something because the users love that
+    elif (game.screen == 'ingame'):
+        characterPos = game.data['character']['position']
+        for x_coordinate in range(screensize[0]):
+            chunk = game.data['blocks'][x_coordinate + characterPos[0]]
+            rowData = ''
+            centerBlock = int((screensize[1] - 1) / 2)
+            for y_coordinate in range(screensize[1]):
+                distanceFromCenter = y_coordinate - centerBlock
+                if (distanceFromCenter < game.data['meta']['parameters']['maxHeight'] and distanceFromCenter > game.data['meta']['parameters']['minHeight']):
+                    blockType = chunk[distanceFromCenter]
+                    rowData += str(eval('colorama.Fore.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
+                else:
+                    rowData += ''
+            sys.stdout.write(rowData + '\n')
     if (skipInput == False):
         command = input('cli-terraria> ') #gather user input for the next action
         if (command == 'exit'): #the player typed in 'exit' on the input above
