@@ -1,5 +1,5 @@
 import shutil, colorama, random, sys, os, time
-colorama.Fore.LIGHTRED_EX
+
 class game:
     def getClearScreenCommand() -> str: #how to clear all stdout from the screen
         if (sys.platform.lower() not in ['win32', 'win64']): #assume anything but windows is linux/unix
@@ -85,6 +85,8 @@ while (game.running):
     elif (game.screen == 'ingame'):
         characterPos = game.data['character']['position']
         screenData = ''
+        screensize[1] -= 1 #make room for debug rows
+        sys.stdout.write('POS: {}'.format(str(game.data['character']['position'])))
         for y_coordinate in range(screensize[1]):
             for x_coordinate in range(screensize[0]):
                 centerBlock = int((screensize[1] - 1) / 2)
@@ -98,5 +100,11 @@ while (game.running):
         sys.stdout.write(screenData + '\n')
     if (skipInput == False):
         command = input('cli-terraria> ') #gather user input for the next action
-        if (command == 'exit'): #the player typed in 'exit' on the input above
+        if (command.split(' ')[0] == 'exit'): #the player typed in 'exit' on the input above
             exit()
+        elif (command.split(' ')[0] == 'move-x'):
+            try:
+                amount = int(command.split(' ')[1])
+                game.data['character']['position'][0] += amount
+            except ValueError:
+                pass
