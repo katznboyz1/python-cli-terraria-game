@@ -84,18 +84,28 @@ while (game.running):
         time.sleep(0.25) #make it seem like its doing something because the users love that
     elif (game.screen == 'ingame'):
         characterPos = game.data['character']['position']
-        for x_coordinate in range(screensize[0]):
+        screenData = ''
+        for y_coordinate in range(screensize[1]):
+            for x_coordinate in range(screensize[0]):
+                centerBlock = int((screensize[1] - 1) / 2)
+                distanceFromCenter = -(y_coordinate - centerBlock)
+                if (distanceFromCenter < game.data['meta']['parameters']['maxHeight'] and distanceFromCenter > game.data['meta']['parameters']['minHeight']):
+                    blockType = game.data['blocks'][x_coordinate + characterPos[0]][distanceFromCenter]
+                else:
+                    blockType = 'BLACK'
+                screenData += str(eval('colorama.Fore.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
+            screenData += '\n'
+        """for x_coordinate in range(screensize[0]):
             chunk = game.data['blocks'][x_coordinate + characterPos[0]]
-            rowData = ''
             centerBlock = int((screensize[1] - 1) / 2)
             for y_coordinate in range(screensize[1]):
                 distanceFromCenter = y_coordinate - centerBlock
                 if (distanceFromCenter < game.data['meta']['parameters']['maxHeight'] and distanceFromCenter > game.data['meta']['parameters']['minHeight']):
                     blockType = chunk[distanceFromCenter]
-                    rowData += str(eval('colorama.Fore.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
+                    screenData += str(eval('colorama.Fore.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
                 else:
-                    rowData += ''
-            sys.stdout.write(rowData + '\n')
+                    screenData += ''"""
+        sys.stdout.write(screenData + '\n')
     if (skipInput == False):
         command = input('cli-terraria> ') #gather user input for the next action
         if (command == 'exit'): #the player typed in 'exit' on the input above
