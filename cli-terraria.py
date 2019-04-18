@@ -33,7 +33,7 @@ class game:
                 if (y_coordinate > groundLevel): #is above the ground level
                     block = 'LIGHTCYAN_EX'
                 else:
-                    blocksBelowGroundLevel = groundLevel + y_coordinate
+                    blocksBelowGroundLevel = groundLevel - y_coordinate
                     if (blocksBelowGroundLevel == 0):
                         block = 'GREEN' #is at the ground level
                     else:
@@ -95,16 +95,6 @@ while (game.running):
                     blockType = 'BLACK'
                 screenData += str(eval('colorama.Fore.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
             screenData += '\n'
-        """for x_coordinate in range(screensize[0]):
-            chunk = game.data['blocks'][x_coordinate + characterPos[0]]
-            centerBlock = int((screensize[1] - 1) / 2)
-            for y_coordinate in range(screensize[1]):
-                distanceFromCenter = y_coordinate - centerBlock
-                if (distanceFromCenter < game.data['meta']['parameters']['maxHeight'] and distanceFromCenter > game.data['meta']['parameters']['minHeight']):
-                    blockType = chunk[distanceFromCenter]
-                    screenData += str(eval('colorama.Fore.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
-                else:
-                    screenData += ''"""
         sys.stdout.write(screenData + '\n')
     if (skipInput == False):
         command = input('cli-terraria> ') #gather user input for the next action
