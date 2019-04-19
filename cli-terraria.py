@@ -50,6 +50,8 @@ class game:
     }
     blockType = '\u2588'
 
+lastOutput = 'Nothing'
+
 while (game.running):
     os.system(game.getClearScreenCommand())
     screensize = shutil.get_terminal_size() #get the terminal size
@@ -85,9 +87,10 @@ while (game.running):
     elif (game.screen == 'ingame'):
         characterPos = game.data['character']['position']
         screenData = ''
-        screensize[1] -= 1 #make room for debug rows
-        sys.stdout.write('POS: {}'.format(str(game.data['character']['position'])))
+        screensize[1] -= 2 #make room for debug rows
+        sys.stdout.write('POS: {}\n'.format(str(game.data['character']['position'])))
         for y_coordinate in range(screensize[1]):
+            lastBlock = None
             for x_coordinate in range(screensize[0]):
                 centerBlock = int((screensize[1] - 1) / 2)
                 distanceFromCenter = -(y_coordinate - centerBlock)
@@ -95,9 +98,11 @@ while (game.running):
                     blockType = game.data['blocks'][x_coordinate + characterPos[0]][distanceFromCenter]
                 else:
                     blockType = 'BLACK'
+                lastBlock = blockType
                 screenData += str(eval('colorama.Fore.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
             screenData += '\n'
         sys.stdout.write(screenData + '\n')
+        sys.stdout.write('Last Console Output: {}\n'.format(lastOutput))
     if (skipInput == False):
         command = input('cli-terraria> ') #gather user input for the next action
         if (command.split(' ')[0] == 'exit'): #the player typed in 'exit' on the input above
@@ -106,5 +111,6 @@ while (game.running):
             try:
                 amount = int(command.split(' ')[1])
                 game.data['character']['position'][0] += amount
+                lastOutput = 'Moved the character {} units along the X axis.'.format(str(amount))
             except ValueError:
                 pass
