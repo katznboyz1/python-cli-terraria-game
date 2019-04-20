@@ -1,5 +1,7 @@
 import shutil, colorama, random, sys, os, time
 
+colorama.Fore.BROWN = '\x1b[33m'
+
 class game:
     def getClearScreenCommand() -> str: #how to clear all stdout from the screen
         if (sys.platform.lower() not in ['win32', 'win64']): #assume anything but windows is linux/unix
@@ -7,7 +9,7 @@ class game:
         else:
             return 'cls' #windows clear command
     data = {} #the world data for the game
-    def generateTerrainData(startingHeight = 0, maxHeight = 20, minHeight = -20, worldWidth = 2000) -> dict: #generate a new world using the parameters
+    def generateTerrainData(startingHeight = 0, maxHeight = 30, minHeight = -30, worldWidth = 2000) -> dict: #generate a new world using the parameters
         dataDict = {
             'meta':{
                 'version':'1',
@@ -36,10 +38,12 @@ class game:
                     blocksBelowGroundLevel = groundLevel - y_coordinate
                     if (blocksBelowGroundLevel == 0):
                         block = 'GREEN' #is at the ground level
+                    elif (blocksBelowGroundLevel < 3):
+                        block = 'BROWN' #is at dirt level
                     else:
                         block = 'LIGHTBLACK_EX' #stone level
                 dataDict['blocks'][x_coordinate][y_coordinate] = block
-            groundLevel += random.choice([-1, 0, 0, 0, 1])
+            groundLevel += random.choice([-1, 0, 0, 0, 0, 1])
         return dataDict
     running = True #makes sure the game is still running
     screen = 'loading' #controls what page the program displays
@@ -88,7 +92,7 @@ while (game.running):
         characterPos = game.data['character']['position']
         screenData = ''
         screensize[1] -= 2 #make room for debug rows
-        sys.stdout.write('POS: {}\n'.format(str(game.data['character']['position'])))
+        screenData += 'POS: {}\n'.format(str(game.data['character']['position']))
         for y_coordinate in range(screensize[1]):
             lastBlock = None
             for x_coordinate in range(screensize[0]):
@@ -101,8 +105,22 @@ while (game.running):
                 lastBlock = blockType
                 screenData += str(eval('colorama.Fore.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
             screenData += '\n'
-        sys.stdout.write(screenData + '\n')
-        sys.stdout.write('Last Console Output: {}\n'.format(lastOutput))
+        screenData += '\n'
+        screenData += 'Last Console Output: {}\n'.format(lastOutput)
+        sys.stdout.write(screenData)
+    elif (game.screen == 'help'):
+        helpStuff = '''
+Command list for cli-terraria.py:
+
+    move-x <blocks> - Moves the player x blocks along the x-axis.
+    exit - Exits the game.
+    help - Opens the help menu.
+    game - Sets the screen go the game.
+'''
+        sys.stdout.write(helpStuff)
+        leftOverLines = screensize[1] - helpStuff.count('\n')
+        if (leftOverLines > 0):
+            sys.stdout.write('\n' * leftOverLines)
     if (skipInput == False):
         command = input('cli-terraria> ') #gather user input for the next action
         if (command.split(' ')[0] == 'exit'): #the player typed in 'exit' on the input above
@@ -113,4 +131,8 @@ while (game.running):
                 game.data['character']['position'][0] += amount
                 lastOutput = 'Moved the character {} units along the X axis.'.format(str(amount))
             except ValueError:
-                pass
+                lastOutput = 'Invalid value for "move-x": "{}"'.format(command.split(' ')[1])
+        elif (command.split(' ')[0] == 'help'):
+            game.screen = 'help'
+        elif (command.split(' ')[0] == 'game'):
+            game.screen = 'ingame'
