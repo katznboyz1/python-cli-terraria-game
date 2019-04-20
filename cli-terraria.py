@@ -1,6 +1,7 @@
 import shutil, colorama, random, sys, os, time
 
 colorama.Fore.BROWN = '\x1b[33m'
+colorama.Back.BROWN = '\x1b[33m'
 
 class game:
     def getClearScreenCommand() -> str: #how to clear all stdout from the screen
@@ -97,13 +98,19 @@ while (game.running):
             lastBlock = None
             for x_coordinate in range(screensize[0]):
                 centerBlock = int((screensize[1] - 1) / 2)
-                distanceFromCenter = -(y_coordinate - centerBlock)
+                distanceFromCenter = -(y_coordinate - centerBlock) + game.data['character']['position'][1]
+                isCenterCrosshair = False
                 if (distanceFromCenter < game.data['meta']['parameters']['maxHeight'] and distanceFromCenter > game.data['meta']['parameters']['minHeight']):
                     blockType = game.data['blocks'][x_coordinate + characterPos[0]][distanceFromCenter]
                 else:
                     blockType = 'BLACK'
+                if (x_coordinate == int(screensize[0] / 2) and y_coordinate == int(screensize[1] / 2)):
+                    isCenterCrosshair = True
                 lastBlock = blockType
-                screenData += str(eval('colorama.Fore.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
+                if (not isCenterCrosshair):
+                    screenData += str(eval('colorama.Fore.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
+                else:
+                    screenData += str(eval('colorama.Back.{}'.format(blockType)) + colorama.Fore.BLUE + '+' + colorama.Style.RESET_ALL)
             screenData += '\n'
         screenData += '\n'
         screenData += 'Last Console Output: {}\n'.format(lastOutput)
@@ -113,6 +120,8 @@ while (game.running):
 Command list for cli-terraria.py:
 
     move-x <blocks> - Moves the player x blocks along the x-axis.
+    move-y <blocks> - Moves the player x blocks along the y-axis.
+    move <xblocks> <yblocks> - Moves the player x blocks along the y-axis and x blocks along the y axis.
     exit - Exits the game.
     help - Opens the help menu.
     game - Sets the screen go the game.
@@ -132,7 +141,23 @@ Command list for cli-terraria.py:
                 lastOutput = 'Moved the character {} units along the X axis.'.format(str(amount))
             except ValueError:
                 lastOutput = 'Invalid value for "move-x": "{}"'.format(command.split(' ')[1])
+        elif (command.split(' ')[0] == 'move-y'):
+            try:
+                amount = int(command.split(' ')[1])
+                game.data['character']['position'][1] += amount
+                lastOutput = 'Moved the character {} units along the Y axis.'.format(str(amount))
+            except ValueError:
+                lastOutput = 'Invalid value for "move-x": "{}"'.format(command.split(' ')[1])
         elif (command.split(' ')[0] == 'help'):
             game.screen = 'help'
         elif (command.split(' ')[0] == 'game'):
             game.screen = 'ingame'
+        elif (command.split(' ')[0] == 'move'):
+            try:
+                xamount = int(command.split(' ')[1])
+                yamount = int(command.split(' ')[2])
+                game.data['character']['position'][0] += xamount
+                game.data['character']['position'][1] += yamount
+                lastOutput = 'Moved the character [{}, {}] units'.format(xamount, yamount)
+            except ValueError:
+                lastOutput = 'Invalid value(s) for "move"'
