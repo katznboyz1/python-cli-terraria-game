@@ -39,8 +39,6 @@ class game:
                     blocksBelowGroundLevel = groundLevel - y_coordinate
                     if (blocksBelowGroundLevel == 0):
                         block = 'GREEN' #is at the ground level
-                    elif (blocksBelowGroundLevel < 3):
-                        block = 'BROWN' #is at dirt level
                     else:
                         block = 'LIGHTBLACK_EX' #stone level
                 dataDict['blocks'][x_coordinate][y_coordinate] = block
@@ -108,7 +106,7 @@ while (game.running):
                     isCenterCrosshair = True
                 lastBlock = blockType
                 if (not isCenterCrosshair):
-                    screenData += str(eval('colorama.Fore.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
+                    screenData += str(eval('colorama.Fore.{}'.format(blockType)) + eval('colorama.Back.{}'.format(blockType)) + '\u2588' + colorama.Style.RESET_ALL)
                 else:
                     screenData += str(eval('colorama.Back.{}'.format(blockType)) + colorama.Fore.BLUE + '+' + colorama.Style.RESET_ALL)
             screenData += '\n'
