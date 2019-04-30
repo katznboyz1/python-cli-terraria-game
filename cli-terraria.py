@@ -10,7 +10,7 @@ class game:
         else:
             return 'cls' #windows clear command
     data = {} #the world data for the game
-    def generateTerrainData(startingHeight = 0, maxHeight = 30, minHeight = -30, worldWidth = 2000) -> dict: #generate a new world using the parameters
+    def generateTerrainData(startingHeight = 0, maxHeight = 50, minHeight = -50, worldWidth = 2000) -> dict: #generate a new world using the parameters
         dataDict = {
             'meta':{
                 'version':'1',
@@ -22,6 +22,9 @@ class game:
                 }
             },
             'blocks':{
+
+            },
+            'placedBlocks':{
 
             },
             'character':{
@@ -88,10 +91,10 @@ while (game.running):
         skipInput = True
         time.sleep(0.25) #make it seem like its doing something because the users love that
     elif (game.screen == 'ingame'):
-        characterPos = game.data['character']['position']
+        characterPos = coords = [int(screensize[0] / 2), int(screensize[1] / 2)]
         screenData = ''
         screensize[1] -= 2 #make room for debug rows
-        screenData += 'POS: {}\n'.format(str(game.data['character']['position']))
+        screenData += 'POS: {}\n'.format(str([int(screensize[0] / 2), int(screensize[1] / 2)]))
         for y_coordinate in range(screensize[1]):
             lastBlock = None
             for x_coordinate in range(screensize[0]):
@@ -123,6 +126,7 @@ Command list for cli-terraria.py:
     exit - Exits the game.
     help - Opens the help menu.
     game - Sets the screen go the game.
+    placeblock - Places a block at the crosshair.
 '''
         sys.stdout.write(helpStuff)
         leftOverLines = screensize[1] - helpStuff.count('\n')
@@ -159,3 +163,7 @@ Command list for cli-terraria.py:
                 lastOutput = 'Moved the character [{}, {}] units'.format(xamount, yamount)
             except ValueError:
                 lastOutput = 'Invalid value(s) for "move"'
+        elif (command.split(' ')[0] == 'placeblock'):
+            coords = [int(screensize[0] / 2), int(screensize[1] / 2)]
+            lastOutput = 'Placed a block at: [{},{}].'.format(str(coords[0] + game.data['character']['position'][0]), str(coords[1]))
+            #add the block to the placedBlocks dict
